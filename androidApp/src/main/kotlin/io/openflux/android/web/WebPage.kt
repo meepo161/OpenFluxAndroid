@@ -84,6 +84,10 @@ class WebPage(
             override fun onPageStarted(view: WebView, url: String, favicon: Bitmap?) {
                 this@WebPage.url = url
                 loading = true
+                // Where a sign-in goes, for adb logcat -s OpenFluxWeb; no query (tokens live there).
+                if (view.context.applicationInfo.flags and android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE != 0) {
+                    android.util.Log.d("OpenFluxWeb", url.substringBefore('?').substringBefore('#'))
+                }
             }
 
             override fun onPageFinished(view: WebView, url: String) {
