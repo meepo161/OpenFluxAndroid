@@ -3,6 +3,43 @@
 All notable changes to OpenFluxAndroid. Format loosely follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2.7.0] - 2026-09-28 (meepo161/OpenFluxAndroid)
+
+### Added
+
+- «Аккаунты»: sign in once to Yandex or Mail.ru in the built-in browser; the
+  app keeps only the session (owner-only `accounts.json`, never in backups,
+  logs, QR codes or links) and shows each service's status — signed in (with
+  the login and when it was last checked), expired, or asking for a check.
+  Sessions are rechecked every 30 minutes without the browser; «Войти заново»
+  is one button, on the card and in a banner on Home when a profile needs it.
+- «Создать документ» makes the channel's document with the saved account, no
+  `cookies.txt` export: Yandex — a document on Disk with editing by link;
+  Mail.ru — a document in Cloud (`/openflux`), published and switched to
+  editing by link, then checked the way the core opens it (anonymous
+  `r7/edit`). The same button sits under a document field in the profile
+  editor; the node wizard uses the saved Yandex account too.
+- The Yandex sign-in goes into the core's cookie store before it connects, and
+  to your own node (from the wizard) over the tunnel, again after a fresh
+  sign-in. Someone else's node gets it only by hand, after a warning. The
+  Mail.ru account is never put into the core: its transport opens the
+  document anonymously and Cloud refuses that request with the account's
+  cookies.
+- Cups.online: «Сгенерировать комнаты» in the profile editor opens four rooms
+  without a node; the node given the same string joins them.
+
+### Fixed
+
+- Creating a Yandex document failed with «Failed to fetch»: Disk now
+  redirects `/editnew` to `docs.yandex.ru`, where the browser refused a
+  readable (CORS) request. Affected the node wizard as well.
+- The built-in browser pages saw a 0 px viewport (the WebView was sized to
+  its content): VK ID for Mail.ru stayed blank, and Yandex's «Resend code»
+  sheet (SMS, Telegram) closed as soon as it opened. The sign-in now takes
+  the whole screen on a phone.
+- The core library is linked for 16 KB pages; Android 15+ no longer runs the
+  app in a compatibility mode with a warning on every start.
+
 ## [2.6.0] - 2026-09-28 (meepo161/OpenFluxAndroid)
 
 The first release of the meepo161 fork: the app, its update check, the core
