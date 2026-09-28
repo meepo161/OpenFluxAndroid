@@ -46,6 +46,10 @@ class WebViewAccountBrowser : AccountBrowser {
         _page.value = WebPage(url, scripts = true, userAgent = if (kind == AccountKind.Yandex) WebPage.USER_AGENT else null)
     }
 
+    override fun load(url: String) {
+        current?.load(url)
+    }
+
     override suspend fun evaluate(script: String): String =
         (current ?: throw IllegalStateException("Страница закрыта")).evaluate(script)
 
