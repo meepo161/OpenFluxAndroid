@@ -41,7 +41,9 @@ class WebViewAccountBrowser : AccountBrowser {
             manager.flush()
         }
         // The page loads once the screen shows it (WebBrowserViews).
-        _page.value = WebPage(url, scripts = true)
+        // Only Yandex ties a session to the core's user agent; other sign-in
+        // pages (VK ID for Mail.ru) break under a desktop one.
+        _page.value = WebPage(url, scripts = true, userAgent = if (kind == AccountKind.Yandex) WebPage.USER_AGENT else null)
     }
 
     override suspend fun evaluate(script: String): String =
