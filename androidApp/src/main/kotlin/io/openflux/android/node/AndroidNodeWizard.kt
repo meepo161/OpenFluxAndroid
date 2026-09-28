@@ -1,5 +1,7 @@
 package io.openflux.android.node
 
+import io.openflux.desktop.service.Accounts
+import io.openflux.desktop.service.AccountException
 import io.openflux.android.web.WebPage
 import io.openflux.bridge.mobile.Mobile
 import io.openflux.desktop.model.LogLevel
@@ -41,11 +43,10 @@ import kotlin.coroutines.coroutineContext
  * installer), and the channel's Yandex document created in a WebView. The
  * calls block, so they run off the main thread, one at a time.
  */
-class AndroidNodeWizard : NodeWizardService {
+class AndroidNodeWizard(private val accounts: Accounts) : NodeWizardService {
     private val json = Json { ignoreUnknownKeys = true }
     private val lock = Mutex()
-    private val _documentPage = MutableStateFlow<BrowserPage?>(null)
-    override val documentPage: StateFlow<BrowserPage?> = _documentPage.asStateFlow()
+    override val documentPage: StateFlow<BrowserPage?> = accounts.page
 
     private val lineIds = AtomicLong()
     private val _logs = MutableStateFlow<List<LogLine>>(emptyList())
@@ -118,55 +119,17 @@ class AndroidNodeWizard : NodeWizardService {
     }
 
     /**
-     * Opens Yandex in a WebView for the user to sign in, then runs the Disk
-     * web client's own calls from the Disk page to create the document with
-     * edit access by link. Every cookie is wiped on the way out: the sign-in
-     * stays only in the header handed back for the node.
+     * The document with the saved Yandex account (signing in first when
+     * needed), on the WebView the wizard shows as [documentPage].
      */
-    override suspend fun createDocument(fileName: String, onStep: (String) -> Unit): YandexDocument {
-        require(Regex("^[a-z0-9-]{1,64}$").matches(fileName)) { "Неверное имя документа" }
-        cancelDocument()
-        WebPage.clearCookies()
-        val page = WebPage(YandexDisk.START_URL, scripts = true)
-        _documentPage.value = page
+    override suspend fun createDocument(fileName: String, onStep: (String) -> Unit): YandexDocument =
         try {
-            onStep(YandexDisk.SIGN_IN)
-            val deadline = System.currentTimeMillis() + YandexDisk.SIGN_IN_TIMEOUT_MS
-            while (true) {
-                coroutineContext.ensureActive()
-                if (page.closed) throw NodeWizardException("Вход в Яндекс отменён")
-                if (System.currentTimeMillis() > deadline) throw NodeWizardException("Время на вход в Яндекс вышло")
-                if (page.loading || !page.url.startsWith(YandexDisk.DISK_CLIENT)) {
-                    delay(1000)
-                    continue
-                }
-                onStep("Создаю документ на Яндекс Диске…")
-                val raw = runCatching { page.evaluate(YandexDisk.script(fileName)) }.getOrNull()
-                val result = raw?.let { runCatching { Json.parseToJsonElement(it).jsonObject }.getOrNull() }
-                when (result?.get("state")?.jsonPrimitive?.content) {
-                    "done" -> {
-                        val url = result["url"]?.jsonPrimitive?.content?.let(NodeDocuments::clean)
-                            ?: throw NodeWizardException("Яндекс вернул неожиданную ссылку на документ")
-                        return YandexDocument(url, page.cookieHeader(url))
-                    }
-                    "fail" -> throw NodeWizardException(
-                        "Не получилось создать документ: " + (result["error"]?.jsonPrimitive?.content ?: "ошибка Яндекса"),
-                    )
-                    else -> Unit // still loading, signed out, or the page moved on
-                }
-                onStep(YandexDisk.SIGN_IN)
-                delay(1500)
-            }
-        } finally {
-            _documentPage.value = null
-            page.close()
-            WebPage.clearCookies()
+            accounts.createWizardDocument(fileName, onStep)
+        } catch (e: AccountException) {
+            throw NodeWizardException(e.message ?: "Не получилось создать документ")
         }
-    }
 
-    override fun cancelDocument() {
-        (_documentPage.value as? WebPage)?.close()
-    }
+    override fun cancelDocument() = accounts.cancel()
 
     override fun close() {
         cancelDocument()
