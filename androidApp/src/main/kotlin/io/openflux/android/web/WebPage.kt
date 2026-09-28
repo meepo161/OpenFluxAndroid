@@ -35,6 +35,8 @@ class WebPage(
     private val startUrl: String,
     private val proxy: String = "",
     private val scripts: Boolean = false,
+    /** null keeps WebView's own; Yandex pages get the core's (see [USER_AGENT]). */
+    private val userAgent: String? = USER_AGENT,
 ) : BrowserPage {
     @Volatile var url: String = startUrl
         private set
@@ -59,7 +61,7 @@ class WebPage(
             javaScriptEnabled = true
             domStorageEnabled = true
             // The UA the core fetches the document with: a check's pass may be bound to it.
-            userAgentString = USER_AGENT
+            if (userAgent != null) userAgentString = userAgent
             useWideViewPort = true
             loadWithOverviewMode = true
             builtInZoomControls = true
