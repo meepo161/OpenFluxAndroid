@@ -120,7 +120,7 @@ class AndroidNodeWizard(private val accounts: Accounts) : NodeWizardService {
 
     /**
      * The document with the saved Yandex account (signing in first when
-     * needed), on the WebView the wizard shows as [documentPage].
+     * needed), in the sign-in window the Accounts tab uses (full screen).
      */
     override suspend fun createDocument(fileName: String, onStep: (String) -> Unit): YandexDocument =
         try {
