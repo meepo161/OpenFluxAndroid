@@ -125,6 +125,7 @@ class AndroidConnectionService(
                 val current = run ?: return@collect
                 if (_state.value !is ConnectionState.Connected || !ownsExit(current)) return@collect
                 for ((kind, session) in sessions) {
+                    if (!kind.opensSignedIn) continue
                     if (!session.expired && current.pushed[kind] != session.cookies) pushQuietly(current, kind)
                 }
             }
@@ -468,7 +469,7 @@ class AndroidConnectionService(
             else log(LogLevel.Info, "Связь с нодой восстановлена")
             if (current.kind != Kind.Exit) refreshExitAddress()
             if (first && ownsExit(current)) scope.launch {
-                accounts.sessions.value.values.filter { !it.expired }.forEach { pushQuietly(current, it.kind) }
+                accounts.sessions.value.values.filter { !it.expired && it.kind.opensSignedIn }.forEach { pushQuietly(current, it.kind) }
             }
         }
     }
