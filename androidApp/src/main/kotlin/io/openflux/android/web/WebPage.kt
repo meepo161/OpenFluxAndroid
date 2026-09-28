@@ -136,6 +136,12 @@ class WebPage(
         }
     }
 
+    /** Sends the page to [url] once it is on screen. */
+    fun load(url: String) {
+        val web = view
+        if (web != null) web.post { if (!closed) web.loadUrl(url) }
+    }
+
     /** The Cookie header the page's cookie jar sends to [url]. */
     fun cookieHeader(url: String): String = CookieManager.getInstance().getCookie(url).orEmpty()
 
