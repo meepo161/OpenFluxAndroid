@@ -56,7 +56,15 @@ class WebPage(
             (existing.parent as? ViewGroup)?.removeView(existing)
             return existing
         }
+        // Debug builds: chrome://inspect can look inside the sign-in pages.
+        if (context.applicationInfo.flags and android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE != 0) {
+            WebView.setWebContentsDebuggingEnabled(true)
+        }
         val web = WebView(context)
+        // AndroidView would give it WRAP_CONTENT: the WebView then sizes to
+        // its content and pages see a viewport 0 px high (VK ID stayed blank,
+        // Yandex's bottom sheets closed as soon as they opened).
+        web.layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
         web.settings.apply {
             javaScriptEnabled = true
             domStorageEnabled = true
