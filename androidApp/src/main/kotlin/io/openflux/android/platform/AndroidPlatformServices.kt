@@ -141,7 +141,7 @@ class AndroidPlatformServices(
     }
 
     private companion object {
-        const val RELEASE_REPO = "p1neappleXpress/OpenFluxAndroid"
+        const val RELEASE_REPO = "meepo161/OpenFluxAndroid"
         const val TAG_PREFIX = "v"
         const val MAX_QR_IMAGE = 2048
         val IMAGE_EXTENSIONS = setOf("png", "jpg", "jpeg", "bmp", "gif", "webp")

@@ -5,6 +5,7 @@ import io.openflux.bridge.mobile.Mobile
 import io.openflux.desktop.model.LogLevel
 import io.openflux.desktop.model.LogLine
 import io.openflux.desktop.model.NewChannel
+import io.openflux.desktop.model.NodeCoreSource
 import io.openflux.desktop.model.NodeDocuments
 import io.openflux.desktop.model.NodePlan
 import io.openflux.desktop.model.NodeTransport
@@ -50,11 +51,11 @@ class AndroidNodeWizard : NodeWizardService {
     private val _logs = MutableStateFlow<List<LogLine>>(emptyList())
     override val logs: StateFlow<List<LogLine>> = _logs.asStateFlow()
 
-    override suspend fun connect(target: SshTarget): ServerProbe {
-        val reply = call("nodeConnect", "${target.host}:${target.port} (${target.user})") {
+    override suspend fun connect(target: SshTarget, source: NodeCoreSource): ServerProbe {
+        val reply = call("nodeConnect", "${target.host}:${target.port} (${target.user}) core=${source.id}") {
             Mobile.nodeConnect(
                 target.host, target.port.toLong(), target.user,
-                target.password, target.privateKey, target.passphrase, target.hostKey,
+                target.password, target.privateKey, target.passphrase, target.hostKey, source.id,
             )
         }
         return json.decodeFromJsonElement(ServerProbe.serializer(), reply.getValue("probe"))

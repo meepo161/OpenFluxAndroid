@@ -3,7 +3,21 @@
 All notable changes to OpenFluxAndroid. Format loosely follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [Unreleased]
+## [2.6.0] - 2026-09-28 (meepo161/OpenFluxAndroid)
+
+The first release of the meepo161 fork: the app, its update check, the core
+submodule and the node wizard's core come from the fork's repositories
+(meepo161/OpenFlux, meepo161/OpenFluxClientShared, meepo161/OpenFluxAndroid).
+
+### Added
+
+- «Своя нода»: step 1 asks whose core the server gets — the fork's
+  (`meepo161/OpenFlux`, default) or the original (`p1neappleXpress/OpenFlux`);
+  the node's auto-update then follows that repository.
+- The core is built into the APK (fork `v0.2.0`); the choice of the
+  node's core is in the wizard.
+
+### From p1neappleXpress/OpenFluxAndroid (not yet released there)
 
 ### Added
 
