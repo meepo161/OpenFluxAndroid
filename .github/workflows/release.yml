@@ -120,6 +120,9 @@ jobs:
           if [[ "$GITHUB_REF" == refs/tags/v* ]]; then tag="${GITHUB_REF#refs/tags/}"
           else tag="v${{ inputs.version }}"; fi
           notes="APK универсальный или под архитектуру устройства. Ядро: \`$(git -C OpenFlux rev-parse --short HEAD)\`. Контрольные суммы — в \`SHA256SUMS.txt\`."
+          # The release shows its CHANGELOG.md section first.
+          changes=$(awk -v v="${tag#v}" 'index($0, "## [")==1 { if (f) exit; f = (index($0, "## [" v "]") == 1); next } f' CHANGELOG.md)
+          [ -n "$changes" ] && notes="$changes"$'\n\n'"$notes"
           if gh release view "$tag" >/dev/null 2>&1; then
             # The tag was moved to rebuild an existing release: replace its
             # assets and refresh the notes instead of failing on create.
