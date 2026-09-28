@@ -50,7 +50,7 @@ class WebViewAccountBrowser : AccountBrowser {
         (current ?: throw IllegalStateException("Страница закрыта")).evaluate(script)
 
     override suspend fun cookies(kind: AccountKind): Map<String, String> = withContext(Dispatchers.Main) {
-        val urls = if (kind == AccountKind.Yandex) YandexDisk.ACCOUNT_URLS else listOf(kind.homeUrl, kind.signInUrl)
+        val urls = kind.cookieUrls
         val manager = CookieManager.getInstance()
         val out = linkedMapOf<String, String>()
         // WebView does not say a cookie's domain; the sign-in host comes first.
