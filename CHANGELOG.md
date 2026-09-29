@@ -3,6 +3,22 @@
 All notable changes to OpenFluxAndroid. Format loosely follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2.9.0] - 2026-09-29 (meepo161/OpenFluxAndroid)
+
+### Added
+
+- «Своя нода» makes every document right in the wizard, no developer mode:
+  the Yandex document (Volga), a Mail.ru document (in Cloud, published and
+  open to editing by link) and a Yandex board (open to guests as editors).
+  The sign-in opens in the Accounts window; a saved one skips it. A pasted
+  link still works for each.
+- The wizard offers two more carriers: Yandex Docs (the same Yandex document
+  through the older transport) and Yandex Board. The node takes them too:
+  `node-install.sh` writes `yandex` and `boards` transports, pinned at
+  [`6d277eb`](https://github.com/meepo161/OpenFlux/commit/6d277ebd05ef69348b8f12ba8915c90fdcfbb19f).
+- The profile editor makes a board for a Yandex Board carrier.
+- Bumps `OpenFlux` to `7006309` and `shared` to `de4a638`.
+
 ## [2.8.0] - 2026-09-29 (meepo161/OpenFluxAndroid)
 
 The fork on p1neappleXpress 2.1.0: links read and made by the core, a
