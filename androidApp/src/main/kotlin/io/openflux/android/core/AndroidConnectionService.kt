@@ -149,7 +149,7 @@ class AndroidConnectionService(
     private fun pushTo(run: Run, kind: AccountKind): Int {
         check(run.kind != Kind.Exit && run.profile.session) { "Передать вход можно только ноде профиля Session" }
         val session = accounts.validSession(kind) ?: throw IllegalStateException("Сначала войдите в ${kind.label}")
-        val types = kind.transports.joinToString(",") { it.cliName }
+        val types = kind.signedInTransports.joinToString(",") { it.cliName }
         val sent = Mobile.offerExitCookies(types, AccountCookies.header(session.cookies)).toInt()
         check(sent > 0) { "В профиле нет транспортов ${kind.label}" }
         run.pushed[kind] = session.cookies
@@ -504,7 +504,7 @@ class AndroidConnectionService(
         // OpenFlux stays outside its own VPN, so without a proxy of its own it
         // cannot ask ipify through the tunnel; only a browser the user opens can.
         if (checked.kind != Kind.Proxy) {
-            if (run === checked) _exitAddress.value = ExitAddress.Unavailable("откройте api.ipify.org в браузере")
+            if (run === checked) _exitAddress.value = ExitAddress.NotCheckable("в режиме VPN видно в браузере: api.ipify.org")
             return
         }
         _exitAddress.value = ExitAddress.Checking

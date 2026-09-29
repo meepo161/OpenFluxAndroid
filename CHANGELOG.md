@@ -3,6 +3,22 @@
 All notable changes to OpenFluxAndroid. Format loosely follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2.9.1] - 2026-09-29 (meepo161/OpenFluxAndroid)
+
+### Fixed
+
+- «Своя нода», step 4 (verification) on an Android phone in VPN mode: the app
+  is kept out of its own VPN, so it could never ask where the traffic
+  leaves; the step retried until its 150 s timeout and failed. It now counts
+  the new node's Session answer (right key and document) as the proof, and
+  Home says the exit address is seen in a browser (api.ipify.org).
+- «Проверить ещё раз» after a failed verification ended at once with the old
+  error: it read the previous attempt's state before the new connection
+  started. It now waits for the new connection.
+- A Yandex board is joined as a guest: the Yandex sign-in is no longer put
+  into its carrier or offered to its node.
+- Bumps `shared` to 48f1255.
+
 ## [2.9.0] - 2026-09-29 (meepo161/OpenFluxAndroid)
 
 ### Added
