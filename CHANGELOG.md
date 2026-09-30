@@ -3,6 +3,18 @@
 All notable changes to OpenFluxAndroid. Format loosely follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2.9.3] - 2026-09-30 (meepo161/OpenFluxAndroid)
+
+### Fixed
+
+- Mail.ru carrier: with both ends on the document, the connection to it
+  dropped every half minute (the editor server locked the document on one
+  end and dropped it when it did not unlock it), and each rejoin stalled
+  traffic for up to 30 seconds; long uploads, such as a stream, broke. The
+  carrier now unlocks the document for the other end. The wizard installs
+  node core node-v1.2.3.
+- Bumps `OpenFlux` to 14dc27d.
+
 ## [2.9.2] - 2026-09-30 (meepo161/OpenFluxAndroid)
 
 ### Fixed
