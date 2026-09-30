@@ -23,6 +23,7 @@ import io.openflux.desktop.model.ConnectionState
 import io.openflux.desktop.model.ExitAddress
 import io.openflux.desktop.model.LogLevel
 import io.openflux.desktop.model.LogLine
+import io.openflux.desktop.model.NetworkKind
 import io.openflux.desktop.model.Profile
 import io.openflux.desktop.model.TrafficStats
 import io.openflux.desktop.model.YandexDisk
@@ -104,6 +105,8 @@ class AndroidConnectionService(
         @Volatile var notice = ""
         /** The sign-ins handed to the exit this run, not to send the same twice. */
         val pushed = java.util.concurrent.ConcurrentHashMap<AccountKind, Map<String, String>>()
+        /** The networks the carriers are bound to (bonding), null when none. */
+        @Volatile var networks: NetworkBinding? = null
     }
 
     @Volatile private var run: Run? = null
@@ -238,6 +241,11 @@ class AndroidConnectionService(
             Kind.Proxy -> Mobile.stopProxy()
             Kind.Exit -> Mobile.stopExit()
         }
+        current.networks?.let {
+            Mobile.setNetworkBinder(null)
+            it.close()
+            current.networks = null
+        }
         drainLogs(current)
         if (run === current) run = null
         if (pending === current) pending = null
@@ -314,6 +322,7 @@ class AndroidConnectionService(
     // ---- running the core ----
 
     private suspend fun execute(current: Run, host: CoreService) {
+        bindNetworks(current)
         var error = startCarrier(current)
         // Some transports (Volga) fail Start outright on a Yandex check; a
         // retry replays the cookies the user got.
@@ -331,10 +340,32 @@ class AndroidConnectionService(
         }
     }
 
+    /**
+     * Brings up the networks the profile's carriers are bound to (bonding:
+     * mobile data next to Wi-Fi) before the core dials; a network that
+     * does not come up leaves its carriers out, the others carry on.
+     */
+    private suspend fun bindNetworks(current: Run) {
+        val kinds = current.profile.carriers.map { it.network }.toSet() - NetworkKind.Default
+        if (!current.profile.session || kinds.isEmpty()) return
+        val binding = NetworkBinding(context, kinds)
+        current.networks = binding
+        binding.await(NETWORK_WAIT_MS)
+        val up = binding.available
+        val missing = kinds.filter { it.cli !in up }.joinToString { it.label }
+        log(
+            if (missing.isEmpty()) LogLevel.Info else LogLevel.Warning,
+            "Сети для транспортов: " + kinds.joinToString { it.label + if (it.cli in up) " есть" else " нет" } +
+                if (missing.isEmpty()) "" else ". Транспорты на «$missing» не подключатся, пока сеть не появится",
+        )
+        if (current.profile.bonding) log(LogLevel.Info, "Бондинг: транспорты работают одновременно, когда нода согласится")
+    }
+
     private fun startCarrier(current: Run): String {
         val profile = current.profile
         val secret = profile.secret
         Mobile.setDebugLevel(current.settings.debugLevel.toLong())
+        Mobile.setNetworkBinder(current.networks)
         return if (profile.session) {
             val specs = CoreSpecs.session(profile, exit = current.kind == Kind.Exit, directPort = current.settings.exitDirectPort)
             when (current.kind) {
@@ -682,6 +713,7 @@ class AndroidConnectionService(
         private const val FALLBACK_DNS = "1.1.1.1"
         private const val POLL_MS = 1000L
         private const val CONNECT_TIMEOUT_MS = 30_000L
+        private const val NETWORK_WAIT_MS = 5_000L
         private const val SETTLE_MS = 1500L
         private const val MAX_LOG_LINES = 5000
         private val IP = Regex("""^[0-9a-fA-F:.]{3,45}$""")
