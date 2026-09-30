@@ -3,6 +3,18 @@
 All notable changes to OpenFluxAndroid. Format loosely follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2.9.2] - 2026-09-30 (meepo161/OpenFluxAndroid)
+
+### Fixed
+
+- A node the wizard sets up now also serves clients that speak only the
+  classic protocol, such as the iOS app: they were dropped on every carrier
+  of the node and never got through. The wizard installs node core
+  node-v1.2.2; nodes with the core updater on get it by themselves.
+- The core no longer drops packets when a carrier's batch queue is full
+  (node-v1.2.1 backpressure): it waits and retries in order.
+- Bumps `OpenFlux` to d420317.
+
 ## [2.9.1] - 2026-09-29 (meepo161/OpenFluxAndroid)
 
 ### Fixed
