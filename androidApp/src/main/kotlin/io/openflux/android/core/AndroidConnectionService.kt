@@ -159,11 +159,11 @@ class AndroidConnectionService(
 
     // ---- connect / disconnect ----
 
-    override fun connect(profile: Profile) {
+    override fun connect(profile: Profile, mode: ConnectionMode?) {
         scope.launch {
             lifecycle.withLock {
                 run?.let { stop(it, restart = true) }
-                begin(profile)
+                begin(profile, mode)
             }
         }
     }
@@ -172,8 +172,8 @@ class AndroidConnectionService(
         scope.launch { lifecycle.withLock { run?.let { stop(it, restart = false) } } }
     }
 
-    private suspend fun begin(profile: Profile) {
-        val current = settings.settings.value
+    private suspend fun begin(profile: Profile, mode: ConnectionMode?) {
+        val current = settings.settings.value.let { s -> mode?.let { s.copy(mode = it) } ?: s }
         _exitShareLink.value = null
         _exitAddress.value = ExitAddress.Unknown
         _traffic.value = TrafficStats()
@@ -186,6 +186,10 @@ class AndroidConnectionService(
             current.mode == ConnectionMode.Exit -> Kind.Exit
             current.fullTunnel -> Kind.Vpn
             else -> Kind.Proxy
+        }
+        if (kind == Kind.Exit) profile.exitProblem()?.let {
+            fail(profile, it)
+            return
         }
         if (kind == Kind.Vpn && !bridge.prepareVpn(context)) {
             fail(profile, "Android не разрешил OpenFlux включить VPN")

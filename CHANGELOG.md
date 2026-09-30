@@ -3,6 +3,19 @@
 All notable changes to OpenFluxAndroid. Format loosely follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2.9.4] - 2026-09-30 (meepo161/OpenFluxAndroid)
+
+### Fixed
+
+- A node's profile (made by «Своя нода») started in exit mode ran a second
+  exit on the node's own document: both exits took and answered the
+  clients' packets and an iOS client got nowhere. The app now refuses to
+  run it as an exit and says to switch to «Клиент» or make a separate
+  profile with its own document.
+- The wizard's check connects to the new node as a client whatever mode
+  the app is in; it no longer asks to switch the mode first.
+- Bumps `shared` to 9c5fc2f.
+
 ## [2.9.3] - 2026-09-30 (meepo161/OpenFluxAndroid)
 
 ### Fixed
