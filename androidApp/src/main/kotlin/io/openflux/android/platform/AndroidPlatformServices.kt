@@ -1,5 +1,6 @@
 package io.openflux.android.platform
 
+import io.openflux.desktop.data.CupsRooms
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
@@ -102,6 +103,8 @@ class AndroidPlatformServices(
 
     override fun now(): Long = System.currentTimeMillis()
 
+    override suspend fun newCupsRooms(): String = CupsRooms.create()
+
     override suspend fun latestRelease(): String? = withContext(Dispatchers.IO) {
         runCatching {
             val connection = URL("https://api.github.com/repos/$RELEASE_REPO/releases?per_page=20").openConnection() as HttpURLConnection
@@ -141,7 +144,7 @@ class AndroidPlatformServices(
     }
 
     private companion object {
-        const val RELEASE_REPO = "p1neappleXpress/OpenFluxAndroid"
+        const val RELEASE_REPO = "meepo161/OpenFluxAndroid"
         const val TAG_PREFIX = "v"
         const val MAX_QR_IMAGE = 2048
         val IMAGE_EXTENSIONS = setOf("png", "jpg", "jpeg", "bmp", "gif", "webp")
